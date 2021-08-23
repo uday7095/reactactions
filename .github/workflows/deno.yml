@@ -27,4 +27,4 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
       - run: |
-          aws s3 sync . s3://githubactiontask
+          aws s3 sync . s3://bucket-notifications-task
