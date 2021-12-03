@@ -1,13 +1,12 @@
-name: staging-deploy
+name: prod-deploy
 
 on:
   push:
     branches:
-      - "staging"
-  workflow_dispatch:  
+      - "master"
+
 jobs:
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -18,17 +17,17 @@ jobs:
         run: npm run build
         env:
           CI: false
-          REACT_APP_NODE_ENV: staging
+          REACT_APP_NODE_ENV: development
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION_STAGE }}
+          aws-region: ${{ secrets.AWS_REGION }}
       - name: Copy files to the AWS S3 bucket
         run: |
-          aws s3 sync --acl public-read --delete build s3://${{ secrets.S3_STAGE_BUCKET_NAME }}
+          aws s3 sync --acl public-read --delete build ${{ secrets.S3_PROD_BUCKET_NAME }}
       - name: Invalidate cloudfront distribution
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{secrets.STAGE_DISTRIBUTION_ID}} --paths '/*'
+          aws cloudfront create-invalidation --distribution-id $PROD_DISTRIBUTION_ID --paths '/*'
           echo "DEPLOYED SUCCESSFULLY"
